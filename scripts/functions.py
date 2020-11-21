@@ -13,7 +13,7 @@ stop_words = set(stopwords.words('english'))
 # Variables
 #########################
 
-covid_list = ['covid','virus', 'corona','ncov','sars', 'super spread', 'super-spread', 'pandemic', 'epidemic', 'outbreak', 'new case', 'active case', 'community spread', 'contact trac', 'social distanc','self isolat', 'self-isolat', 'mask', 'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine']
+covid_list = ['covid','virus', 'corona','ncov','sars', 'super spread', 'super-spread', 'pandemic', 'epidemic', 'outbreak', 'new case', 'new death', 'active case', 'community spread', 'contact trac', 'social distanc','self isolat', 'self-isolat', 'mask', 'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine', 'bonnie']
 
 rt_regex = "^rt"
 
@@ -95,6 +95,19 @@ def is_retweet(text):
     if re.match(rt_regex, text) is not None:
         return 1
     return 0
+
+def top_bigrams(df=raw, n=10):
+    """
+    * Not generalizable in this form *
+    Takes a preposcessed, tokenized column and create a large list.
+    Returns most frequent bigrams
+
+    Arguments:
+        df = name of DataFrame with no_hashtags column (this will be generalizable in a future commit)
+        n = number of bigrams to return
+        """
+    word_list = preprocess(''.join(str(df['no_hashtags'].tolist())))
+    return (pd.Series(nltk.ngrams(word_list, 2)).value_counts())[:n]
 
 #########################
 
