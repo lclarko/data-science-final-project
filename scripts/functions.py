@@ -65,8 +65,7 @@ def covid_mention(text, synonyms=covid_list):
     
     Arguments:
         synonyms: A list object
-    Exampe:
-        df['covid_mention'] = df['full_text'].apply(covid_mention)
+    Example: df['covid_mention'] = df['full_text'].apply(covid_mention)
     """
     for term in synonyms:
         if term in text:
