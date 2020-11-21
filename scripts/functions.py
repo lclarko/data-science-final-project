@@ -1,8 +1,19 @@
+import pandas as pd
+import numpy as np
+import pdpipe as pdp
+
+import re
+import string
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+stop_words = set(stopwords.words('english'))
+
 #########################
 # Variables
 #########################
 
-covid_list = ['covid','virus', 'corona','ncov','sars','pandemic', 'new case', 'active case', 'social distanc', 'mask', 'ppe', 'quarantine']
+covid_list = ['covid','virus', 'corona','ncov','sars', 'super spread', 'super-spread', 'pandemic', 'epidemic', 'outbreak', 'new case', 'active case', 'community spread', 'contact trac', 'social distanc','self isolat', 'self-isolat', 'mask', 'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine']
 
 rt_regex = "^rt"
 
