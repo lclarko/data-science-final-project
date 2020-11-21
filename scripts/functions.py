@@ -1,23 +1,23 @@
-######################
+#########################
 # Variables
-######################
+#########################
 
 covid_list = ['covid','virus', 'corona','ncov','sars','pandemic', 'new case', 'active case', 'social distanc', 'mask', 'ppe', 'quarantine']
 
 rt_regex = "^rt"
 
-######################
+#########################
 # Preprocessing Functions
-######################
+#########################
 
 def preprocess(text, hashtags=False, join=False):
     """Strips out URLs, usernames, punctuation, and other unwanted text.
     Tweets are tokenzied and stop words removed. Removing hashtags and
     joining tokens back into a string is optional.
     
-    Can create a new column with optional arguments via:
+    Example - Creating a new column in DataFrame:
     
-    df['new_col'] = df['col'].apply(lambda x: preprocess(x, hashtags=True))
+    df['new_col'] = df['full_text'].apply(lambda x: preprocess(x, hashtags=True))
     """
     text = text.lower()
     if hashtags:
@@ -38,12 +38,18 @@ def joiner(text):
     string = (' ').join(text)
     return string
 
-######################
+#########################
 # Feature Functions
-######################
+#########################
 
 def covid_mention(text, synonyms=covid_list):
-    """ Checks tweet for presence of any word from the
+    """ Checks tweet for presence of any word from the synonyms list.
+    Returns a binary if word is present. text must be lowercase
+    
+    Arguments:
+        synonyms: A list object
+    Exampe:
+        df['covid_mention'] = df['full_text'].apply(covid_mention)
     """
     for term in synonyms:
         if term in text:
@@ -51,19 +57,17 @@ def covid_mention(text, synonyms=covid_list):
         continue
     return 0
 
-# Create binary column for is_retweet
 def is_retweet(text):
+    """ Checks if tweet is a retweet.
+    Returns a binary. text must be lowercase
+    
+    Exampe:
+        df['is_retweet'] = df['full_text'].apply(is_retweet)
+    """
     if re.match(rt_regex, text) is not None:
         return 1
     return 0
 
+#########################
 
-######################
-
-######################
-
-
-
-######################
-
-######################
+#########################
