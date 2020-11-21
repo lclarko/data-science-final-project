@@ -11,7 +11,8 @@ rt_regex = "^rt"
 #########################
 
 def preprocess(text, hashtags=False, join=False):
-    """Strips out URLs, usernames, punctuation, and other unwanted text.
+    """
+    Strips out URLs, usernames, punctuation, and other unwanted text.
     Tweets are tokenzied and stop words removed. Removing hashtags and
     joining tokens back into a string is optional.
     
@@ -33,8 +34,23 @@ def preprocess(text, hashtags=False, join=False):
         stops = (' ').join(stops)
     return stops
 
+def emoji_stringer(text):
+    """
+    Converts common positive and negative ASCII emotions to 'emopos and 'emoneg'
+    """    
+    # Positive Emoji - Smile, Laugh, Wink,Love
+    text = ' '.join(re.sub('(:\s?\)|:-\)|;\)|\(\s?:|\(-:|:\’\))','emopos',text).split()) # add this :-))
+    text = ' '.join(re.sub('(:\s?D|:-D|x-?D|X-?D)','emopos',text).split()) 
+    text = ' '.join(re.sub('(<3|:\*)','emopos',text).split()) 
+    # Negative Emoji - Sad, Cry
+    text = ' '.join(re.sub('(:\s?\(|:-\(|:\||\)\s?:|\)-:)','emoneg',text).split())
+    text = ' '.join(re.sub('(:,\(|:\’\(|:"\()','emoneg',text).split())
+    return text
+
 def joiner(text):
-    """Simple function to join a list together into one string"""
+    """
+    Simple function to join a list together into one string
+    """
     string = (' ').join(text)
     return string
 
@@ -43,7 +59,8 @@ def joiner(text):
 #########################
 
 def covid_mention(text, synonyms=covid_list):
-    """ Checks tweet for presence of any word from the synonyms list.
+    """
+    Checks tweet for presence of any word from the synonyms list.
     Returns a binary if word is present. text must be lowercase
     
     Arguments:
@@ -58,7 +75,8 @@ def covid_mention(text, synonyms=covid_list):
     return 0
 
 def is_retweet(text):
-    """ Checks if tweet is a retweet.
+    """
+    Checks if tweet is a retweet.
     Returns a binary. text must be lowercase
     
     Exampe:
