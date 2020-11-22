@@ -13,7 +13,13 @@ stop_words = set(stopwords.words('english'))
 # Variables
 #########################
 
-covid_list = ['covid','virus', 'corona','ncov','sars', 'super spread', 'super-spread', 'pandemic', 'epidemic', 'outbreak', 'new case', 'new death', 'active case', 'community spread', 'contact trac', 'social distanc','self isolat', 'self-isolat', 'mask', 'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine', 'bonnie', 'new normal']
+covid_list = ['covid','virus', 'corona','ncov','sars',
+              'super spread', 'super-spread', 'pandemic',
+              'epidemic', 'outbreak', 'new case', 'new death',
+              'active case', 'community spread', 'contact trac',
+              'social distanc','self isolat', 'self-isolat', 'mask',
+              'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine',
+              'bonnie', 'new normal']
 
 rt_regex = '(^rt)|(^RT)'
 
