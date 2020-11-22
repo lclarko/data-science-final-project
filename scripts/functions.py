@@ -13,9 +13,9 @@ stop_words = set(stopwords.words('english'))
 # Variables
 #########################
 
-covid_list = ['covid','virus', 'corona','ncov','sars', 'super spread', 'super-spread', 'pandemic', 'epidemic', 'outbreak', 'new case', 'new death', 'active case', 'community spread', 'contact trac', 'social distanc','self isolat', 'self-isolat', 'mask', 'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine', 'bonnie']
+covid_list = ['covid','virus', 'corona','ncov','sars', 'super spread', 'super-spread', 'pandemic', 'epidemic', 'outbreak', 'new case', 'new death', 'active case', 'community spread', 'contact trac', 'social distanc','self isolat', 'self-isolat', 'mask', 'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine', 'bonnie', 'new normal']
 
-rt_regex = "^rt"
+rt_regex = '(^rt)|(^RT)'
 
 #########################
 # Preprocessing Functions
@@ -33,17 +33,23 @@ def preprocess(text, hashtags=False, join=False):
     """
     text = text.lower()
     if hashtags:
-        text = ' '.join(re.sub(r"\#\w*[a-zA-Z]+\w*","",text).split())
-    text = ' '.join(re.sub("((www\.[\S]+)|(https?://[\S]+))","",text).split())
-    text = ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)","",text).split())
-    text = ' '.join(re.sub("^\n","",text).split())
-    text = ' '.join(re.sub("^rt","",text).split())
+        text = ' '.join(re.sub(r'\#\w*[a-zA-Z]+\w*','',text).split())
+    text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
+    text = ' '.join(re.sub('(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)','',text).split())
+    text = ' '.join(re.sub('^\n','',text).split())
+    text = ' '.join(re.sub('^rt','',text).split())
     punc = ''.join([char for char in text if char not in string.punctuation])
     tokens = word_tokenize(punc)
     stops = [word for word in tokens if word not in stop_words]
     if join:
         stops = (' ').join(stops)
     return stops
+
+def vader_preprocess(text):
+    """
+    Alternate tweet processing for VADER, which can handle punctuation and capitalization.
+    """
+    pass
 
 def emoji_stringer(text):
     """
@@ -65,9 +71,24 @@ def joiner(text):
     string = (' ').join(text)
     return string
 
+def lower_case(text):
+    """
+    Simple function to convert text to lowercase
+    Used in pipeline as workaround
+    """    
+    return text.lower()
+
+
 #########################
 # Feature Functions
 #########################
+
+def extract_username(df):
+    """
+    Extracts and creates a new column for username from user column, which exists as a dictionary with many keys.
+    """
+    df['user_name'] = df['user'].apply(lambda x: x.get('screen_name'))
+    return df
 
 def covid_mention(text, synonyms=covid_list):
     """
@@ -86,8 +107,8 @@ def covid_mention(text, synonyms=covid_list):
 
 def is_retweet(text):
     """
-    Checks if tweet is a retweet.
-    Returns a binary. text must be lowercase
+    Checks if tweet is a retweet. Test is case insensitive
+    Returns a binary.
     
     Exampe:
         df['is_retweet'] = df['full_text'].apply(is_retweet)
@@ -96,7 +117,7 @@ def is_retweet(text):
         return 1
     return 0
 
-def top_bigrams(df=raw, n=10):
+def top_bigrams(df, n=10):
     """
     * Not generalizable in this form *
     Takes a preposcessed, tokenized column and create a large list.
@@ -108,6 +129,13 @@ def top_bigrams(df=raw, n=10):
         """
     word_list = preprocess(''.join(str(df['no_hashtags'].tolist())))
     return (pd.Series(nltk.ngrams(word_list, 2)).value_counts())[:n]
+
+def vader_scores(text):
+    """
+    Returns the compound sentiment score from VADER analyzer.polarity_score
+    """
+    score = analyser.polarity_scores(text)
+    return score['compound']
 
 #########################
 
