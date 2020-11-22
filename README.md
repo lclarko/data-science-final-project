@@ -9,8 +9,6 @@ data-science-final-project/
 ├── README.md
 ├── data
 │   ├── bcpoli_tweet_id_400k.txt
-│   ├── df_no_rt_covid_mention.pkl
-│   └── df_no_rt_no_covid.pkl
 ├── notebooks
 │   ├── preliminary_analysis
 │   │   ├── preliminary_twitter_data_exploration.ipynb
