@@ -9,6 +9,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english'))
 
+
 #########################
 # Variables
 #########################
@@ -22,6 +23,21 @@ covid_list = ['covid','virus', 'corona','ncov','sars',
               'bonnie', 'new normal']
 
 rt_regex = '(^rt)|(^RT)'
+
+bc_cov19_url = 'https://health-infobase.canada.ca/src/data/covidLive/covid19-download.csv'
+
+#########################
+# Data Collection
+#########################
+
+def get_covid_data(globe=True):
+    if globe:
+            global df_bc_covid
+    df_bc_covid = pd.read_csv(bc_cov19_url)
+    df_bc_covid = df_bc_covid[df_bc_covid.prname == 'British Columbia']
+    df_bc_covid = df_bc_covid[['date','numtoday','numtotal_last7','numdeathstoday','numdeaths_last7','numactive']]
+    df_bc_covid = df_bc_covid.set_index('date')
+    return df_bc_covid
 
 #########################
 # Preprocessing Functions
