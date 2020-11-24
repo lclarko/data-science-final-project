@@ -29,9 +29,11 @@ covid_list = ['covid','virus', 'corona','ncov','sars',
               'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine',
               'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions']
 
-rt_regex = '(^rt)|(^RT)'
+#rt_regex = '(^rt)|(^RT)'
+rt_regex = '(?:^rt|^RT)' # Removs need for capture group, allowing str.contains to get either
 
 bc_cov19_url = 'https://health-infobase.canada.ca/src/data/covidLive/covid19-download.csv'
+
 
 #########################
 # Data Collection
@@ -48,6 +50,11 @@ def get_covid_data(df_name='df_bc_covid',globe=True):
 #########################
 # Preprocessing Functions
 #########################
+
+def col_filter(df,cols=['created_at','user','full_text','retweet_count', 'retweeted_status']):
+    df.set_index('id_str', inplace=True)
+    df = df[cols]
+    return df
 
 def preprocess(text, hashtags=False, join=False):
     """
@@ -81,6 +88,23 @@ def vader_preprocess(text):
     text = ' '.join(re.sub('^\n','',text).split())
     text = ' '.join(re.sub('^rt','',text).split())
     return text
+
+def extract_full_text(df):
+    """
+    Extracts and creates a new column for username from user column, which exists as a dictionary with many keys.
+    Joins rt_full_text onto main DataFrame
+    Usage:
+        df = extract_full_text(df)
+    """
+    temp = df['retweeted_status'].apply(pd.Series)
+    temp['rt_full_text'] = temp['full_text']
+    df = df.join(temp['rt_full_text'])
+    return df
+
+def replace_retweet_text(df,check_col='full_text',rt_col='rt_full_text'):
+    df.loc[df[check_col].str.contains(rt_regex, regex=True), check_col] = df[rt_col]
+    df[check_col] = df[check_col].astype('str')
+    return df
 
 def emoji_stringer(text):
     """
@@ -118,17 +142,6 @@ def min_max_scale(data):
 # Feature Functions
 #########################
 
-def extract_full_text(df):
-    """
-    Extracts and creates a new column for username from user column, which exists as a dictionary with many keys.
-    Joins rt_full_text onto main DataFrame
-    Usage:
-        df = extract_full_text(df)
-    """
-    temp = df['retweeted_status'].apply(pd.Series)
-    temp['rt_full_text'] = temp['full_text']
-    df = df.join(temp['rt_full_text'])
-    return df
 
 def extract_username(df):
     """
