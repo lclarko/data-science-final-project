@@ -1,13 +1,20 @@
 import pandas as pd
 import numpy as np
 import pdpipe as pdp
+import pickle
 
 import re
 import string
 import nltk
+nltk.download('vader_lexicon')
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from sklearn.feature_extraction.text import TfidfVectorizer
+analyzer = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
+
+from sklearn.preprocessing import MinMaxScaler
 
 
 #########################
@@ -20,7 +27,7 @@ covid_list = ['covid','virus', 'corona','ncov','sars',
               'active case', 'community spread', 'contact trac',
               'social distanc','self isolat', 'self-isolat', 'mask',
               'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine',
-              'bonnie', 'new normal']
+              'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions']
 
 rt_regex = '(^rt)|(^RT)'
 
@@ -30,13 +37,12 @@ bc_cov19_url = 'https://health-infobase.canada.ca/src/data/covidLive/covid19-dow
 # Data Collection
 #########################
 
-def get_covid_data(globe=True):
+def get_covid_data(df_name='df_bc_covid',globe=True):
     if globe:
             global df_bc_covid
     df_bc_covid = pd.read_csv(bc_cov19_url)
     df_bc_covid = df_bc_covid[df_bc_covid.prname == 'British Columbia']
-    df_bc_covid = df_bc_covid[['date','numtoday','numtotal_last7','numdeathstoday','numdeaths_last7','numactive']]
-    df_bc_covid = df_bc_covid.set_index('date')
+    df_bc_covid = df_bc_covid.set_index('date').fillna(0)
     return df_bc_covid
 
 #########################
@@ -71,7 +77,10 @@ def vader_preprocess(text):
     """
     Alternate tweet processing for VADER, which can handle punctuation and capitalization.
     """
-    pass
+    text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
+    text = ' '.join(re.sub('^\n','',text).split())
+    text = ' '.join(re.sub('^rt','',text).split())
+    return text
 
 def emoji_stringer(text):
     """
@@ -100,10 +109,26 @@ def lower_case(text):
     """    
     return text.lower()
 
+def min_max_scale(data):
+    scale = MinMaxScaler()
+    return scale.fit_transform(data)
+
 
 #########################
 # Feature Functions
 #########################
+
+def extract_full_text(df):
+    """
+    Extracts and creates a new column for username from user column, which exists as a dictionary with many keys.
+    Joins rt_full_text onto main DataFrame
+    Usage:
+        df = extract_full_text(df)
+    """
+    temp = df['retweeted_status'].apply(pd.Series)
+    temp['rt_full_text'] = temp['full_text']
+    df = df.join(temp['rt_full_text'])
+    return df
 
 def extract_username(df):
     """
@@ -152,12 +177,26 @@ def top_bigrams(df, n=10):
     word_list = preprocess(''.join(str(df['no_hashtags'].tolist())))
     return (pd.Series(nltk.ngrams(word_list, 2)).value_counts())[:n]
 
-def vader_scores(text):
+def vader_analyze(text):
     """
     Returns the compound sentiment score from VADER analyzer.polarity_score
     """
-    score = analyser.polarity_scores(text)
-    return score['compound']
+    score = analyzer.polarity_scores(text)
+    return score
+
+def categorize(x, upper = 0.05,lower = -0.05):
+    """
+    Categorizes tweets into sentiment categories of 0, 2 and 4.
+    Negative, Netral and Postive, respectively.
+    0, 2 and 4 were chosen to compare against another model that calssifies this way.
+    The upper and lower variables are standard thresholds from VADER Sentiment
+    """
+    if x < lower:
+        return '0'
+    elif ((x > (lower+0.0001) and x < upper)):
+        return '2'
+    else:
+        return '4'
 
 #########################
 
