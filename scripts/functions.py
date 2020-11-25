@@ -63,7 +63,7 @@ def col_filter(df,cols=['created_at','user','full_text','retweet_count', 'retwee
     df = df[cols]
     return df
 
-def preprocess(text, hashtags=False, join=False, url=False, user=True, emo=False):
+def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=True):
     """
     Strips out URLs, usernames, punctuation, and other unwanted text.
     Tweets are tokenzied and stop words removed. Removing hashtags, URLs, 
