@@ -94,7 +94,7 @@ def vader_preprocess(text):
     """
     text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
     text = ' '.join(re.sub('^\n','',text).split())
-    text = ' '.join(re.sub('^&amp','',text).split()) # Added on Nov 24th 4:44PM
+    text = ' '.join(re.sub('amp;','',text).split()) # Added on Nov 24th 4:44PM
     text = ' '.join(re.sub('^rt','',text).split())
     return text
 
@@ -223,11 +223,11 @@ def categorize(x, upper = 0.05,lower = -0.05):
     The upper and lower variables are standard thresholds from VADER Sentiment
     """
     if x < lower:
-        return '0'
+        return 0
     elif ((x > (lower+0.0001) and x < upper)):
-        return '2'
+        return 2
     else:
-        return '4'
+        return 4
 
 #########################
 
