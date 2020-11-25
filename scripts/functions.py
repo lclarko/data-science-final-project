@@ -14,8 +14,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 analyzer = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
 
-from sklearn.preprocessing import MinMaxScaler
-
 
 #########################
 # Variables
@@ -39,13 +37,23 @@ bc_cov19_url = 'https://health-infobase.canada.ca/src/data/covidLive/covid19-dow
 # Data Collection
 #########################
 
-def get_covid_data(df_name='df_bc_covid',globe=True):
+def get_covid_data(df_name='df_bc_covid', globe=True):
+    """
+    Downloads Covid-19 data from Canada Gov site
+    Filters on British Columbia
+    Return DataFrame with date as index
+    """
     if globe:
-            global df_bc_covid
-    df_bc_covid = pd.read_csv(bc_cov19_url)
-    df_bc_covid = df_bc_covid[df_bc_covid.prname == 'British Columbia']
-    df_bc_covid = df_bc_covid.set_index('date').fillna(0)
-    return df_bc_covid
+        global df_bc_covid
+    try:
+        df_bc_covid = pd.read_csv(bc_cov19_url)
+    except:
+        print('Reading CSV from URL failed')
+    else:
+        df_bc_covid = df_bc_covid[df_bc_covid.prname == 'British Columbia']
+        df_bc_covid = df_bc_covid.set_index('date').fillna(0)
+        df_bc_covid.drop(['pruid','prname','prnameFR'], axis=1, inplace=True)
+        return df_bc_covid
 
 #########################
 # Preprocessing Functions
@@ -72,6 +80,7 @@ def preprocess(text, hashtags=False, join=False):
     text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
     text = ' '.join(re.sub('(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)','',text).split())
     text = ' '.join(re.sub('^\n','',text).split())
+    text = ' '.join(re.sub('^&amp','',text).split()) # Added on Nov 24th 4:44PM
     text = ' '.join(re.sub('^rt','',text).split())
     punc = ''.join([char for char in text if char not in string.punctuation])
     tokens = word_tokenize(punc)
@@ -86,6 +95,7 @@ def vader_preprocess(text):
     """
     text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
     text = ' '.join(re.sub('^\n','',text).split())
+    text = ' '.join(re.sub('^&amp','',text).split()) # Added on Nov 24th 4:44PM
     text = ' '.join(re.sub('^rt','',text).split())
     return text
 
@@ -132,10 +142,6 @@ def lower_case(text):
     Used in pipeline as workaround
     """    
     return text.lower()
-
-def min_max_scale(data):
-    scale = MinMaxScaler()
-    return scale.fit_transform(data)
 
 
 #########################
@@ -196,6 +202,19 @@ def vader_analyze(text):
     """
     score = analyzer.polarity_scores(text)
     return score
+
+def vader_score_to_series(df):
+    """
+    Combines several functions to return pos, neg, neu and compound VADER scores as new columns
+    Requires vader_analyze and categorize
+    Usage:
+        df = vader_score_to_series(df)
+    """
+    df['vader_scores'] = df['vader_text'].apply(vader_analyze)
+    df = df.join(df['vader_scores'].apply(pd.Series))
+    df.drop(columns='vader_scores', inplace=True, axis=1)
+    df['vader_label'] = df['compound'].apply(lambda x: categorize(x)).astype('int8')
+    return df
 
 def categorize(x, upper = 0.05,lower = -0.05):
     """
