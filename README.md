@@ -17,11 +17,20 @@ data-science-final-project/
 ├── LICENSE
 ├── README.md
 ├── data
+│   ├── bc_covid_data.sav
 │   ├── bcpoli_tweet_id_400k.txt
+│   └── bcpoli_vader_labelled_tweets.sav
+├── models
+│   ├── LogReg_GridCV_3C_89p_40kfeats.sav
+│   ├── LogReg_model_3C_86p__40kfeats.sav
+│   └── NBMultinomial_model_3C_83p_40kfeats.sav
 ├── notebooks
 │   ├── preliminary_analysis
 │   │   ├── preliminary_twitter_data_exploration.ipynb
 │   │   └── readme.txt
+│   ├── bc_covid_data.ipynb
+│   ├── sentiment_scoring_400K_tweets.ipynb
+│   ├── training_baseline_classifier.ipynb
 │   └── twitter_data_exploration_400k_tweets.ipynb
 └── scripts
     └── functions.py
