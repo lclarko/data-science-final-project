@@ -27,7 +27,6 @@ covid_list = ['covid','virus', 'corona','ncov','sars',
               'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine',
               'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions']
 
-#rt_regex = '(^rt)|(^RT)'
 rt_regex = '(?:^rt|^RT)' # Removs need for capture group, allowing str.contains to get either
 
 bc_cov19_url = 'https://health-infobase.canada.ca/src/data/covidLive/covid19-download.csv'
