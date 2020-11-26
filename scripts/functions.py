@@ -63,7 +63,7 @@ def col_filter(df,cols=['created_at','user','full_text','retweet_count', 'retwee
     df = df[cols]
     return df
 
-def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=True):
+def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=False):
     """
     Strips out URLs, usernames, punctuation, and other unwanted text.
     Tweets are tokenzied and stop words removed. Removing hashtags, URLs, 
@@ -77,10 +77,9 @@ def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=True):
     if hashtags:
         text = ' '.join(re.sub(r'\#\w*[a-zA-Z]+\w*','',text).split())
     if url:
-        text = ' '.join(re.sub("((www\.[\S]+)|(https?://[\S]+))","URL",text).split())
-    text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
+        text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
     if user:
-        text = ' '.join(re.sub("(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)"," USER ",text).split())
+        text = ' '.join(re.sub('(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)','',text).split())
     if emo:
         # Positive Emoji - Smile, Laugh, Wink,Love
         text = ' '.join(re.sub('(:\s?\)|:-\)|:-\)\)|;\)|\(\s?:|\(-:|:\’\))',' emopos ',text).split()) 
@@ -98,6 +97,13 @@ def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=True):
     if join:
         stops = (' ').join(stops)
     return stops
+
+def tf_preprocess(text):
+    text = ' '.join(re.sub('(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)',' ',text).split())
+    text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
+    text = ' '.join(re.sub('amp;',' ',text).split()) # Added on Nov 24th 4:44PM
+    text = ' '.join(re.sub('^rt',' ',text).split())
+    return text
 
 def vader_preprocess(text):
     """
