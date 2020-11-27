@@ -199,18 +199,19 @@ def is_retweet(text):
         return 1
     return 0
 
-def top_bigrams(df, n=10):
+def top_ngrams(df, n=2, ngrams=10):
     """
     * Not generalizable in this form *
     Takes a preposcessed, tokenized column and create a large list.
-    Returns most frequent bigrams
+    Returns most frequent ngrams
 
     Arguments:
         df = name of DataFrame with no_hashtags column (this will be generalizable in a future commit)
-        n = number of bigrams to return
+        n = number of words per grouping eg. 1, 2 or 3
+        ngrams = Number of ngrams to return
         """
     word_list = preprocess(''.join(str(df['no_hashtags'].tolist())))
-    return (pd.Series(nltk.ngrams(word_list, 2)).value_counts())[:n]
+    return (pd.Series(nltk.ngrams(word_list, n)).value_counts())[:ngrams]
 
 def vader_analyze(text):
     """
