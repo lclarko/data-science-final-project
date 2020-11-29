@@ -13,6 +13,8 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sklearn.feature_extraction.text import TfidfVectorizer
 analyzer = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
+w_tokenizer = nltk.tokenize.WhitespaceTokenizer()
+lemmatizer = nltk.stem.WordNetLemmatizer()
 
 
 #########################
@@ -159,6 +161,17 @@ def lower_case(text):
     """    
     return text.lower()
 
+def lemmatize_text(text):
+    """
+    Lemmatize text, or reduce words to their root. e.g. leaders -> leader
+    
+    Usage:
+    df['lemma'] = df[COL].apply(lambda x: lemmatize_text(x))
+    """
+    text = ' '.join([char for char in text if char not in string.punctuation])
+    text = [lemmatizer.lemmatize(w) for w in w_tokenizer.tokenize(text)]
+    return text
+
 
 #########################
 # Feature Functions
@@ -210,7 +223,7 @@ def top_ngrams(df, n=2, ngrams=10):
         n = number of words per grouping eg. 1, 2 or 3
         ngrams = Number of ngrams to return
         """
-    word_list = preprocess(''.join(str(df['no_hashtags'].tolist())))
+    word_list = preprocess(''.join(str(df['lemma'].tolist())))
     return (pd.Series(nltk.ngrams(word_list, n)).value_counts())[:ngrams]
 
 def vader_analyze(text):
