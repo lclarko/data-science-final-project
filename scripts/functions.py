@@ -29,7 +29,7 @@ covid_list = ['covid','virus', 'corona','ncov','sars',
               'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine',
               'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions']
 
-rt_regex = '(?:^rt|^RT)' # Removs need for capture group, allowing str.contains to get either
+rt_regex = '(?:^rt|^RT)' # Now case insensitive
 
 bc_cov19_url = 'https://health-infobase.canada.ca/src/data/covidLive/covid19-download.csv'
 
@@ -38,7 +38,7 @@ bc_cov19_url = 'https://health-infobase.canada.ca/src/data/covidLive/covid19-dow
 # Data Collection
 #########################
 
-def get_covid_data(df_name='df_bc_covid', globe=True):
+def get_covid_data(df_name='df_bc_covid', globe=False):
     """
     Downloads Covid-19 data from Canada Gov site
     Filters on British Columbia
@@ -61,6 +61,9 @@ def get_covid_data(df_name='df_bc_covid', globe=True):
 #########################
 
 def col_filter(df,cols=['created_at','user','full_text','retweet_count', 'retweeted_status']):
+    """
+    Filters full twitter DataFrame down to desired columns
+    """
     df.set_index('id_str', inplace=True)
     df = df[cols]
     return df
@@ -91,7 +94,7 @@ def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=False)
         text = ' '.join(re.sub('(:\s?\(|:-\(|:\||\)\s?:|\)-:)',' emoneg ',text).split())
         text = ' '.join(re.sub('(:,\(|:\’\(|:"\()',' emoneg ',text).split())
     text = ' '.join(re.sub('^\n','',text).split())
-    text = ' '.join(re.sub('amp;',' ',text).split()) # Added on Nov 24th 4:44PM
+    text = ' '.join(re.sub('amp;',' ',text).split())
     text = ' '.join(re.sub('^rt','',text).split())
     punc = ''.join([char for char in text if char not in string.punctuation])
     tokens = word_tokenize(punc)
@@ -101,19 +104,23 @@ def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=False)
     return stops
 
 def tf_preprocess(text):
+    """
+    This will be removed
+    """
     text = ' '.join(re.sub('(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9-_]+)',' ',text).split())
     text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
-    text = ' '.join(re.sub('amp;',' ',text).split()) # Added on Nov 24th 4:44PM
+    text = ' '.join(re.sub('amp;',' ',text).split())
     text = ' '.join(re.sub('^rt',' ',text).split())
     return text
 
 def vader_preprocess(text):
     """
     Alternate tweet processing for VADER, which can handle punctuation and capitalization.
+    VADER can handle URLs. URLs don't influence sentiment scores, so they are removed
     """
     text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
     text = ' '.join(re.sub('^\n','',text).split())
-    text = ' '.join(re.sub('amp;','',text).split()) # Added on Nov 24th 4:44PM
+    text = ' '.join(re.sub('amp;','',text).split())
     text = ' '.join(re.sub('^rt','',text).split())
     return text
 
@@ -130,6 +137,9 @@ def extract_full_text(df):
     return df
 
 def replace_retweet_text(df,check_col='full_text',rt_col='rt_full_text'):
+    """
+    If retweet, extract the full_text from retweeted status and replaces the truncated version.
+    """
     df.loc[df[check_col].str.contains(rt_regex, regex=True), check_col] = df[rt_col]
     df[check_col] = df[check_col].astype('str')
     return df
@@ -215,6 +225,7 @@ def is_retweet(text):
 def top_ngrams(df, n=2, ngrams=10):
     """
     * Not generalizable in this form *
+    * This works well, but is very inefficient and should be optimized or rewritten *
     Takes a preposcessed, tokenized column and create a large list.
     Returns most frequent ngrams
 
