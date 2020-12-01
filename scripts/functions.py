@@ -27,7 +27,7 @@ covid_list = ['covid','virus', 'corona','ncov','sars',
               'active case', 'community spread', 'contact trac',
               'social distanc','self isolat', 'self-isolat', 'mask',
               'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine',
-              'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions']
+              'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions', 'doyourpartbc']
 
 rt_regex = '(?:^rt|^RT)' # Now case insensitive
 
