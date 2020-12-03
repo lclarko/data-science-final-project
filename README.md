@@ -20,12 +20,16 @@ data-science-final-project/
 │   ├── bc_covid_data.sav
 │   ├── bcpoli_tweet_id_400k.txt
 │   └── bcpoli_vader_labelled_tweets.sav
+├── deploy
+│   ├── readme.txt
+│   └── streamlit.zip
 ├── models
 │   ├── LogReg_GridCV_3C_87p_40kfeats.sav
 │   ├── LogReg_model_3C_86p__40kfeats.sav
 │   └── NBMultinomial_model_3C_83p_40kfeats.sav
 ├── notebooks
 │   ├── preliminary_analysis
+│   │   ├── preliminary_classification_unlabelled_tweets.ipynb
 │   │   ├── preliminary_twitter_data_exploration.ipynb
 │   │   └── readme.txt
 │   ├── bc_covid_data.ipynb
