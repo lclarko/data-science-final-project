@@ -39,3 +39,23 @@ data-science-final-project/
 └── scripts
     └── functions.py
 ```
+
+## Tools Used in this Project
+
+Data Processing
+* [Pandas](https://pandas.pydata.org)
+
+Sentiment Analysis
+* [VADER](https://github.com/cjhutto/vaderSentiment)
+* [scikit-learn](https://scikit-learn.org/stable/)
+
+Topic Modelling
+* [spaCy](https://spacy.io/models/en)
+* [Gensim](https://radimrehurek.com/gensim/)
+
+App Deployment
+* [Streamlit](https://www.streamlit.io/)
+
+Tweet Scraping
+* [Raspberry Pi Zero](https://www.raspberrypi.org/blog/raspberry-pi-zero/)
+                
