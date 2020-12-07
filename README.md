@@ -37,6 +37,7 @@ data-science-final-project/
 │   ├── training_baseline_classifier.ipynb
 │   └── twitter_data_exploration_400k_tweets.ipynb
 └── scripts
+    ├── extract_tweet_ids.R
     └── functions.py
 ```
 
