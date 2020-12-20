@@ -33,6 +33,7 @@ data-science-final-project/
 │   │   ├── preliminary_twitter_data_exploration.ipynb
 │   │   └── readme.txt
 │   ├── bc_covid_data.ipynb
+│   ├── covid_sentiment_impact.ipynb
 │   ├── sentiment_scoring_400K_tweets.ipynb
 │   ├── training_baseline_classifier.ipynb
 │   └── twitter_data_exploration_400k_tweets.ipynb
