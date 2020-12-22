@@ -6,28 +6,28 @@ import pickle
 import re
 import string
 import nltk
-nltk.download('vader_lexicon')
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sklearn.feature_extraction.text import TfidfVectorizer
-analyzer = SentimentIntensityAnalyzer()
+nltk.download('vader_lexicon')
 stop_words = set(stopwords.words('english'))
 w_tokenizer = nltk.tokenize.WhitespaceTokenizer()
 lemmatizer = nltk.stem.WordNetLemmatizer()
-
+analyzer = SentimentIntensityAnalyzer()
 
 #########################
 # Variables
 #########################
 
-covid_list = ['covid','virus', 'corona','ncov','sars',
+covid_list = ['covid', 'virus', 'corona','ncov', 'sars',
               'super spread', 'super-spread', 'pandemic',
               'epidemic', 'outbreak', 'new case', 'new death',
               'active case', 'community spread', 'contact trac',
-              'social distanc','self isolat', 'self-isolat', 'mask',
+              'social distanc', 'self isolat', 'self-isolat', 'mask',
               'ppe', 'quarantine', 'lockdown', 'symptomatic', 'vaccine',
-              'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions', 'doyourpartbc']
+              'bonnie', 'new normal', 'ventilator', 'respirator', 'travel restrictions',
+              'doyourpartbc']
 
 rt_regex = '(?:^rt|^RT)' # Now case insensitive
 
@@ -53,20 +53,22 @@ def get_covid_data(df_name='df_bc_covid', globe=False):
     else:
         df_bc_covid = df_bc_covid[df_bc_covid.prname == 'British Columbia']
         df_bc_covid = df_bc_covid.set_index('date').fillna(0)
-        df_bc_covid.drop(['pruid','prname','prnameFR'], axis=1, inplace=True)
+        df_bc_covid.drop(['pruid', 'prname', 'prnameFR'], axis=1, inplace=True)
         return df_bc_covid
+
 
 #########################
 # Preprocessing Functions
 #########################
 
-def col_filter(df,cols=['created_at','user','full_text','retweet_count', 'retweeted_status']):
+def col_filter(df,cols=['created_at', 'user', 'full_text', 'retweet_count', 'retweeted_status']):
     """
     Filters full twitter DataFrame down to desired columns
     """
     df.set_index('id_str', inplace=True)
     df = df[cols]
     return df
+
 
 def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=False):
     """
@@ -103,6 +105,7 @@ def preprocess(text, hashtags=False, join=False, url=True, user=True, emo=False)
         stops = (' ').join(stops)
     return stops
 
+
 def tf_preprocess(text):
     """
     This will be removed
@@ -113,16 +116,18 @@ def tf_preprocess(text):
     text = ' '.join(re.sub('^rt',' ',text).split())
     return text
 
+
 def vader_preprocess(text):
     """
     Alternate tweet processing for VADER, which can handle punctuation and capitalization.
     VADER can handle URLs. URLs don't influence sentiment scores, so they are removed
     """
-    text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))','',text).split())
-    text = ' '.join(re.sub('^\n','',text).split())
-    text = ' '.join(re.sub('amp;','',text).split())
-    text = ' '.join(re.sub('^rt','',text).split())
+    text = ' '.join(re.sub('((www\.[\S]+)|(https?://[\S]+))', '',text).split())
+    text = ' '.join(re.sub('^\n', '',text).split())
+    text = ' '.join(re.sub('amp;', '',text).split())
+    text = ' '.join(re.sub('^rt', '',text).split())
     return text
+
 
 def extract_full_text(df):
     """
@@ -136,6 +141,7 @@ def extract_full_text(df):
     df = df.join(temp['rt_full_text'])
     return df
 
+
 def replace_retweet_text(df,check_col='full_text',rt_col='rt_full_text'):
     """
     If retweet, extract the full_text from retweeted status and replaces the truncated version.
@@ -144,18 +150,20 @@ def replace_retweet_text(df,check_col='full_text',rt_col='rt_full_text'):
     df[check_col] = df[check_col].astype('str')
     return df
 
+
 def emoji_stringer(text):
     """
     Converts common positive and negative ASCII emotions to 'emopos and 'emoneg'
     """    
     # Positive Emoji - Smile, Laugh, Wink,Love
-    text = ' '.join(re.sub('(:\s?\)|:-\)|;\)|\(\s?:|\(-:|:\’\))','emopos',text).split()) # add this :-))
-    text = ' '.join(re.sub('(:\s?D|:-D|x-?D|X-?D)','emopos',text).split()) 
-    text = ' '.join(re.sub('(<3|:\*)','emopos',text).split()) 
+    text = ' '.join(re.sub(r'(:\s?\)|:-\)|;\)|\(\s?:|\(-:|:\’\))','emopos',text).split())
+    text = ' '.join(re.sub(r'(:\s?D|:-D|x-?D|X-?D)','emopos',text).split()) 
+    text = ' '.join(re.sub(r'(<3|:\*)','emopos',text).split()) 
     # Negative Emoji - Sad, Cry
-    text = ' '.join(re.sub('(:\s?\(|:-\(|:\||\)\s?:|\)-:)','emoneg',text).split())
-    text = ' '.join(re.sub('(:,\(|:\’\(|:"\()','emoneg',text).split())
+    text = ' '.join(re.sub(r'(:\s?\(|:-\(|:\||\)\s?:|\)-:)','emoneg',text).split())
+    text = ' '.join(re.sub(r'(:,\(|:\’\(|:"\()','emoneg',text).split())
     return text
+
 
 def joiner(text):
     """
@@ -164,12 +172,14 @@ def joiner(text):
     string = (' ').join(text)
     return string
 
+
 def lower_case(text):
     """
     Simple function to convert text to lowercase
     Used in pipeline as workaround
     """    
     return text.lower()
+
 
 def lemmatize_text(text):
     """
@@ -195,6 +205,7 @@ def extract_username(df):
     df['user_name'] = df['user'].apply(lambda x: x.get('screen_name'))
     return df
 
+
 def covid_mention(text, synonyms=covid_list):
     """
     Checks tweet for presence of any word from the synonyms list.
@@ -210,6 +221,7 @@ def covid_mention(text, synonyms=covid_list):
         continue
     return 0
 
+
 def is_retweet(text):
     """
     Checks if tweet is a retweet. Test is case insensitive
@@ -221,6 +233,7 @@ def is_retweet(text):
     if re.match(rt_regex, text) is not None:
         return 1
     return 0
+
 
 def top_ngrams(df, n=2, ngrams=10):
     """
@@ -237,12 +250,14 @@ def top_ngrams(df, n=2, ngrams=10):
     word_list = preprocess(''.join(str(df['lemma'].tolist())))
     return (pd.Series(nltk.ngrams(word_list, n)).value_counts())[:ngrams]
 
+
 def vader_analyze(text):
     """
     Returns the compound sentiment score from VADER analyzer.polarity_score
     """
     score = analyzer.polarity_scores(text)
     return score
+
 
 def vader_score_to_series(df):
     """
@@ -257,11 +272,11 @@ def vader_score_to_series(df):
     df['vader_label'] = df['compound'].apply(lambda x: categorize(x)).astype('int8')
     return df
 
-def categorize(x, upper = 0.05,lower = -0.05):
+
+def categorize(x, upper=0.05, lower=-0.05):
     """
     Categorizes tweets into sentiment categories of 0, 2 and 4.
     Negative, Netral and Postive, respectively.
-    0, 2 and 4 were chosen to compare against another model that calssifies this way.
     The upper and lower variables are standard thresholds from VADER Sentiment
     """
     if x < lower:
@@ -270,6 +285,7 @@ def categorize(x, upper = 0.05,lower = -0.05):
         return 2
     else:
         return 4
+
 
 #########################
 
